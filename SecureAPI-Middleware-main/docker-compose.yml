@@ -1,0 +1,29 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"  # Maps port 3000 on your machine to 3000 in the container
+    environment:
+      - DB_HOST=db  # Must be 'db' (the MySQL service name), not 'localhost'
+      - DB_USER=root
+      - DB_PASSWORD=seneth@2000
+      - DB_NAME=country_api
+      - PORT=3000
+      - SESSION_SECRET=3c2e85d5e7764d32140ed65a6254a2a1c7246efc4dcb998564ecdb0402c3d6f8
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=seneth@2000  # Matches your DB_PASSWORD
+      - MYSQL_DATABASE=country_api       # Matches your DB_NAME
+    volumes:
+      - mysql-data:/var/lib/mysql  # Persists MySQL data
+    ports:
+      - "3306:3306"  # Exposes MySQL port to your host (optional, for debugging)
+
+volumes:
+  mysql-data:

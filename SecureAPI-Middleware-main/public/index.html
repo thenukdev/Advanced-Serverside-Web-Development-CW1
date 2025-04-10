@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF W8">
+  <title>Country API Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Country API Admin</h1>
+    
+    <div id="auth">
+      <h2>Register</h2>
+      <input id="reg-username" placeholder="Username" />
+      <input id="reg-password" type="password" placeholder="Password" />
+      <button onclick="register()">Register</button>
+      
+      <h2>Login</h2>
+      <input id="login-username" placeholder="Username" />
+      <input id="login-password" type="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+    </div>
+    
+    <div id="keys" style="display: none;">
+      <h2>API Keys</h2>
+      <button onclick="generateKey()">Generate New Key</button>
+      <ul id="key-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    async function register() {
+      const username = document.getElementById('reg-username').value;
+      const password = document.getElementById('reg-password').value;
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      alert((await res.json()).message);
+    }
+
+    async function login() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (res.ok) {
+        document.getElementById('auth').style.display = 'none';
+        document.getElementById('keys').style.display = 'block';
+        loadKeys();
+      } else {
+        alert((await res.json()).error);
+      }
+    }
+
+    async function generateKey() {
+      const res = await fetch('/auth/generate-key', { method: 'POST' });
+      const data = await res.json();
+      alert(`New API Key: ${data.api_key}`);
+      loadKeys();
+    }
+
+    async function loadKeys() {
+      const res = await fetch('/auth/keys');
+      const keys = await res.json();
+      const list = document.getElementById('key-list');
+      list.innerHTML = '';
+      keys.forEach(key => {
+        const li = document.createElement('li');
+        li.textContent = `${key.api_key} (Requests: ${key.requests_count})`;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
